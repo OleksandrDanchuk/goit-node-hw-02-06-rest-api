@@ -93,6 +93,8 @@ const subscriptionRenewal = async (req, res) => {
 };
 
 const updateAvatar = async (req, res) => {
+  if (!req.file) throw HttpError(400, 'No files were uploaded');
+
   const { _id } = req.user;
   const { path: tempUpload, originalname } = req.file;
   const filemame = `${_id}_${originalname}`;
