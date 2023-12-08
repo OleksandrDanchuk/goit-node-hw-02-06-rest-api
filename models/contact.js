@@ -1,73 +1,34 @@
 const { Schema, model } = require('mongoose');
-const Joi = require('joi');
 
-const userSchema = new Schema(
+const contactSchema = new Schema(
   {
-    password: {
+    name: {
       type: String,
-      required: [true, 'Set password for user'],
+      require: [true, 'Set name for contact'],
     },
     email: {
       type: String,
-      required: [true, 'Email is required'],
-      unique: true,
     },
-    subscription: {
+    phone: {
       type: String,
-      enum: ['starter', 'pro', 'business'],
-      default: 'starter',
     },
-    verify: {
+    favorite: {
       type: Boolean,
       default: false,
     },
-    verificationToken: {
-      type: String,
-      required: [true, 'Verify token is required'],
+    owner: {
+      type: Schema.Types.ObjectId,
+      ref: 'user',
     },
-    avatarURL: String,
-    token: String,
   },
   { versionKey: false }
 );
 
-userSchema.post('save', (error, data, next) => {
-  const { name, code } = error;
-  console.log(name);
-  console.log(code);
-  const status = name === 'MongoServerError' && code === 11000 ? 409 : 400;
-  error.status = status;
+contactSchema.post('save', (error, data, next) => {
+  error.status = 400;
   next();
 });
 
-const registerSchema = Joi.object({
-  email: Joi.string().required(),
-  password: Joi.string().required(),
-});
+const Contact = model('contact', contactSchema);
 
-const emailSchema = Joi.object({
-  email: Joi.string().required(),
-});
-
-const loginSchema = Joi.object({
-  email: Joi.string().required(),
-  password: Joi.string().required(),
-});
-
-const subscriptionSchema = Joi.object({
-  subscription: Joi.string().valid('starter', 'pro', 'business').required(),
-});
-
-const schemas = {
-  registerSchema,
-  loginSchema,
-  subscriptionSchema,
-  emailSchema,
-};
-
-const User = model('user', userSchema);
-
-module.exports = {
-  schemas,
-  User,
-};
+module.exports = Contact;
